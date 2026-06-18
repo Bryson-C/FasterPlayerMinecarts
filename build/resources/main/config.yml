@@ -1,0 +1,14 @@
+defaultSpeed: 8.0
+maxIterations: 2 # 0 = disable, 1 = player directly in minecart, > 2 = player indirectly in minecart
+
+# "speed" can be from 0 - 30 (after 30 the speed doesn't change, probably friction or something)
+carts:
+  mediumSpeed:
+    speed: 12.0
+    name: "MediumSpeed"
+  fastSpeed:
+    speed: 20.0
+    name: "FastSpeed"
+  fastestSpeed:
+    speed: 30.0
+    name: "FastestSpeed"
