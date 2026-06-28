@@ -37,6 +37,7 @@ import java.util.Map;
 public class FasterPlayerCarts extends JavaPlugin implements Listener {
     public int maxIter;
     public double defaultSpeed;
+    public double breakSpeed;
 
     public static Map<String, Double> cartOptions = new HashMap<>();
 
@@ -57,17 +58,13 @@ public class FasterPlayerCarts extends JavaPlugin implements Listener {
         defaultSpeed = config.getDouble("defaultSpeed", 8.0);
         // translate speed to blocks per second (i.e. speed / default tps)
         this.defaultSpeed = defaultSpeed / 20.0;
+        this.breakSpeed = config.getDouble("breakSpeed") / 20.0;
 
         for (String cartOptionKeyName : config.getConfigurationSection("carts").getKeys(false)) {
             String name = config.getString(String.format("carts.%s.name", cartOptionKeyName));
             // translate speed to blocks per tick (i.e. speed / default tps)
             double speed = config.getDouble(String.format("carts.%s.speed", cartOptionKeyName)) / 20.0;
             cartOptions.put(name, speed);
-        }
-        // seperate loop to make sure that the carts are actually in the map
-        sender.sendRichMessage("<green>Loading Carts:<reset>");
-        for (var cart : cartOptions.entrySet()) {
-            sender.sendRichMessage(String.format("<green>Cart \"%s\": %.2f (Blocks/Tick) <green>", cart.getKey(), cart.getValue()));
         }
     }
 
@@ -112,28 +109,36 @@ public class FasterPlayerCarts extends JavaPlugin implements Listener {
         if (!(event.getVehicle() instanceof Minecart minecart)) return;
         minecart.setMaxSpeed(defaultSpeed);
     }
-    private Vector capSpeed(Vector vel) {
+    private Vector capSpeed(Vector vel, double speed) {
         vel = vel.clone();
-        if (vel.length() > defaultSpeed) vel = vel.normalize().multiply(defaultSpeed);
+        if (vel.length() > speed) vel = vel.normalize().multiply(speed);
         return vel;
     }
-    private boolean shouldBrakeForBlock(Block block) {
+
+    private boolean isAscendingRail(Block block) {
         if (block.getBlockData() instanceof Rail rail) {
             Rail.Shape shape = rail.getShape();
-            boolean powered = rail.getMaterial() == Material.POWERED_RAIL;
-            return shape.equals(Rail.Shape.NORTH_EAST) ||
-                    shape.equals(Rail.Shape.SOUTH_EAST) ||
-                    shape.equals(Rail.Shape.SOUTH_WEST) ||
-                    shape.equals(Rail.Shape.NORTH_WEST) ||
-                    (powered && (shape.equals(Rail.Shape.ASCENDING_EAST) ||
-                            shape.equals(Rail.Shape.ASCENDING_WEST) ||
-                            shape.equals(Rail.Shape.ASCENDING_NORTH) ||
-                            shape.equals(Rail.Shape.ASCENDING_SOUTH)
-                    )
-                    );
+            return (shape.equals(Rail.Shape.ASCENDING_EAST) || shape.equals(Rail.Shape.ASCENDING_WEST) || shape.equals(Rail.Shape.ASCENDING_NORTH) || shape.equals(Rail.Shape.ASCENDING_SOUTH));
         }
         return false;
     }
+
+    private boolean isPowered(Block block) {
+        if (block.getBlockData() instanceof Rail rail) {
+            return rail.getMaterial() == Material.POWERED_RAIL;
+        }
+        return false;
+    }
+
+    private boolean shouldBrakeForBlock(Block block) {
+        if (block.getBlockData() instanceof Rail rail) {
+            Rail.Shape shape = rail.getShape();
+            // the "isPowered" causes an issue when a normal rail slants up onto a powered straight rail, so simply disable it
+            return shape.equals(Rail.Shape.NORTH_EAST) || shape.equals(Rail.Shape.SOUTH_EAST) || shape.equals(Rail.Shape.SOUTH_WEST) || shape.equals(Rail.Shape.NORTH_WEST) || (/*isPowered(block) && */isAscendingRail(block));
+        }
+        return false;
+    }
+
     @EventHandler
     private void onVehicleMove(VehicleMoveEvent event) {
         if (!isValidCart(event.getVehicle())) {
@@ -154,8 +159,8 @@ public class FasterPlayerCarts extends JavaPlugin implements Listener {
 
         Block nextBlock = toBlock.getRelative(modX, 0, modZ);
         if (shouldBrakeForBlock(toBlock) || shouldBrakeForBlock(nextBlock)) {
-            minecart.setMaxSpeed(defaultSpeed);
-            Vector newVelocity = capSpeed(velocity);
+            minecart.setMaxSpeed(breakSpeed);
+            Vector newVelocity = capSpeed(velocity, breakSpeed);
             event.getVehicle().setVelocity(newVelocity);
         } else {
             if (cartOptions.containsKey(minecart.getName())) {

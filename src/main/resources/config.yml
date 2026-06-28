@@ -1,9 +1,7 @@
 # default speed of minecarts
 defaultSpeed: 8.0
-
 # 0 = disable, 1 = player directly in minecart, > 2 = player indirectly in minecart
 maxIterations: 2
-
 # "speed" can be from 0 - 30 (after 30 the speed doesn't change, probably friction or something)
 # the double represents blocks per second as the calculation is: (blocks/second) / (ticks/second)
 carts:
@@ -16,3 +14,7 @@ carts:
   fastestSpeed:
     speed: 30.0
     name: "FastestSpeed"
+# break speed
+# this speed is how fast to take turns and slopes, I believe going above 14 causes "bounce backs"
+# 12 is the sweet spot, 13 is pushing it
+breakSpeed: 12.0
