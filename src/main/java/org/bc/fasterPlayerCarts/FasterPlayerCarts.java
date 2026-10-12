@@ -1,5 +1,6 @@
 package org.bc.fasterPlayerCarts;
 
+import com.destroystokyo.paper.ParticleBuilder;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
@@ -7,6 +8,7 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Rail;
 import org.bukkit.command.CommandSender;
@@ -66,6 +68,7 @@ public class FasterPlayerCarts extends JavaPlugin implements Listener {
             double speed = config.getDouble(String.format("carts.%s.speed", cartOptionKeyName)) / 20.0;
             cartOptions.put(name, speed);
         }
+
     }
 
     @Override

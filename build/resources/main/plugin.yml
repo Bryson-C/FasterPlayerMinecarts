@@ -1,5 +1,5 @@
 name: FasterPlayerCarts
-version: '1.0'
+version: '1.3'
 main: org.bc.fasterPlayerCarts.FasterPlayerCarts
-api-version: '26.1.2'
+api-version: '26.3'
 authors: [ BC/EXO ]

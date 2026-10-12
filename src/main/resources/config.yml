@@ -5,6 +5,9 @@ maxIterations: 2
 # "speed" can be from 0 - 30 (after 30 the speed doesn't change, probably friction or something)
 # the double represents blocks per second as the calculation is: (blocks/second) / (ticks/second)
 carts:
+  halfSpeed:
+    speed: 4.0
+    name: "HalfSpeed"
   mediumSpeed:
     speed: 12.0
     name: "MediumSpeed"
